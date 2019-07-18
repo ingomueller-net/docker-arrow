@@ -1,5 +1,3 @@
-FROM ingomuellernet/boost:1.70.0 as boost-builder
-
 FROM ubuntu:bionic
 MAINTAINER Ingo Müller <ingo.mueller@inf.ethz.ch>
 
@@ -27,16 +25,6 @@ RUN mkdir /opt/clang+llvm-7.0.1/ && \
     done && \
     cp /opt/clang+llvm-7.0.1/lib/libomp.so /opt/clang+llvm-7.0.1/lib/libomp.so.5
 
-# Copy boost over from builder
-COPY --from=boost-builder /opt/ /opt/
-
-RUN for file in /opt/boost-1.*/include/*; do \
-        ln -s $file /usr/include/; \
-    done && \
-    for file in /opt/boost-1.*/lib/*; do \
-        ln -s $file /usr/lib/; \
-    done
-
 # Build arrow and pyarrow
 RUN mkdir -p /tmp/arrow && \
     cd /tmp/arrow && \
@@ -47,6 +35,7 @@ RUN mkdir -p /tmp/arrow && \
     cd /tmp/arrow/cpp/build && \
     CXX=clang++-7.0 CC=clang-7.0 \
         cmake \
+            -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_INSTALL_PREFIX=/tmp/arrow/dist \
             -DCMAKE_INSTALL_LIBDIR=lib \
