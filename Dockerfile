@@ -39,6 +39,7 @@ RUN mkdir -p /tmp/arrow && \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_INSTALL_PREFIX=/tmp/arrow/dist \
             -DCMAKE_INSTALL_LIBDIR=lib \
+            -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON \
             -DARROW_WITH_RAPIDJSON=ON \
             -DARROW_PARQUET=ON \
             -DARROW_PYTHON=ON \
