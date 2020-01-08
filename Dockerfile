@@ -19,7 +19,7 @@ RUN apt-get update && \
 # Clang+LLVM
 RUN mkdir /opt/clang+llvm-7.0.1/ && \
     cd /opt/clang+llvm-7.0.1/ && \
-    wget http://releases.llvm.org/7.0.1/clang+llvm-7.0.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz -O - \
+    wget --progress=dot:giga http://releases.llvm.org/7.0.1/clang+llvm-7.0.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz -O - \
          | tar -x -I xz --strip-components=1 && \
     for file in bin/*; \
     do \
@@ -42,7 +42,7 @@ ENV CMAKE_PREFIX_PATH $CMAKE_PREFIX_PATH:/opt/boost-1.72.0
 # Build arrow and pyarrow
 RUN mkdir -p /tmp/arrow && \
     cd /tmp/arrow && \
-    wget https://github.com/apache/arrow/archive/apache-arrow-0.14.0.tar.gz -O - \
+    wget --progress=dot:giga https://github.com/apache/arrow/archive/apache-arrow-0.14.0.tar.gz -O - \
         | tar -xz --strip-components=1 && \
     pip3 install -r /tmp/arrow/python/requirements-build.txt && \
     mkdir -p /tmp/arrow/cpp/build && \
@@ -68,7 +68,7 @@ RUN mkdir -p /tmp/arrow && \
             -DARROW_BUILD_TESTS=OFF \
             -DARROW_RPATH_ORIGIN=ON \
             .. && \
-    make install && \
+    make -j$(nproc) install && \
     cd /tmp/arrow/python && \
     PYARROW_WITH_PARQUET=1 ARROW_HOME=/tmp/arrow/dist \
         python3 setup.py build_ext --bundle-arrow-cpp bdist_wheel && \
