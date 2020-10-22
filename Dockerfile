@@ -17,15 +17,15 @@ RUN apt-get update && \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Clang+LLVM
-RUN mkdir /opt/clang+llvm-7.0.1/ && \
-    cd /opt/clang+llvm-7.0.1/ && \
-    wget --progress=dot:giga http://releases.llvm.org/7.0.1/clang+llvm-7.0.1-x86_64-linux-gnu-ubuntu-16.04.tar.xz -O - \
+RUN mkdir /opt/clang+llvm-9.0.0/ && \
+    cd /opt/clang+llvm-9.0.0/ && \
+    wget --progress=dot:giga http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz -O - \
          | tar -x -I xz --strip-components=1 && \
     for file in bin/*; \
     do \
-        ln -s $PWD/$file /usr/bin/$(basename $file)-7.0; \
+        ln -s $PWD/$file /usr/bin/$(basename $file)-9.0; \
     done && \
-    cp /opt/clang+llvm-7.0.1/lib/libomp.so /opt/clang+llvm-7.0.1/lib/libomp.so.5
+    cp /opt/clang+llvm-9.0.0/lib/libomp.so /opt/clang+llvm-9.0.0/lib/libomp.so.5
 
 # Copy boost over from builder
 COPY --from=boost-builder /opt/ /opt/
@@ -47,7 +47,7 @@ RUN mkdir -p /tmp/arrow && \
     pip3 install -r /tmp/arrow/python/requirements-build.txt && \
     mkdir -p /tmp/arrow/cpp/build && \
     cd /tmp/arrow/cpp/build && \
-    CXX=clang++-7.0 CC=clang-7.0 \
+    CXX=clang++-9.0 CC=clang-9.0 \
         cmake \
             -DCMAKE_COLOR_MAKEFILE=OFF \
             -DCMAKE_BUILD_TYPE=Debug \
@@ -55,6 +55,7 @@ RUN mkdir -p /tmp/arrow && \
             -DCMAKE_INSTALL_PREFIX=/tmp/arrow/dist \
             -DCMAKE_INSTALL_LIBDIR=lib \
             -DCMAKE_INSTALL_RPATH_USE_LINK_PATH=ON \
+            -DBUILD_WARNING_LEVEL=PRODUCTION \
             -DARROW_WITH_RAPIDJSON=ON \
             -DARROW_PARQUET=ON \
             -DARROW_PYTHON=ON \
