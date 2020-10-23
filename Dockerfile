@@ -42,7 +42,7 @@ ENV CMAKE_PREFIX_PATH $CMAKE_PREFIX_PATH:/opt/boost-1.74.0
 # Build arrow and pyarrow
 RUN mkdir -p /tmp/arrow && \
     cd /tmp/arrow && \
-    wget --progress=dot:giga https://github.com/apache/arrow/archive/apache-arrow-0.14.0.tar.gz -O - \
+    wget --progress=dot:giga https://github.com/apache/arrow/archive/apache-arrow-0.14.1.tar.gz -O - \
         | tar -xz --strip-components=1 && \
     pip3 install -r /tmp/arrow/python/requirements-build.txt && \
     mkdir -p /tmp/arrow/cpp/build && \
