@@ -49,6 +49,7 @@ RUN mkdir -p /tmp/arrow && \
     cd /tmp/arrow/cpp/build && \
     CXX=clang++-7.0 CC=clang-7.0 \
         cmake \
+            -DCMAKE_COLOR_MAKEFILE=OFF \
             -DCMAKE_BUILD_TYPE=Debug \
             -DCMAKE_CXX_STANDARD=17 \
             -DCMAKE_INSTALL_PREFIX=/tmp/arrow/dist \
