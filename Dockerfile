@@ -1,6 +1,6 @@
 FROM ingomuellernet/boost:1.74.0 as boost-builder
 
-FROM ubuntu:bionic
+FROM ubuntu:focal
 MAINTAINER Ingo Müller <ingo.mueller@inf.ethz.ch>
 
 # Basics
@@ -10,6 +10,7 @@ RUN apt-get update && \
         bison \
         cmake \
         flex \
+        libtinfo5 \
         pkg-config \
         python3-pip \
         wget \
