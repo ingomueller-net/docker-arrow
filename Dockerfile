@@ -45,6 +45,7 @@ RUN mkdir -p /tmp/arrow && \
     cd /tmp/arrow && \
     wget --progress=dot:giga https://github.com/apache/arrow/archive/apache-arrow-0.14.1.tar.gz -O - \
         | tar -xz --strip-components=1 && \
+    sed -i '148,151d;158,162d;190,191d' cpp/src/arrow/csv/reader.cc && \
     pip3 install -r /tmp/arrow/python/requirements-build.txt && \
     mkdir -p /tmp/arrow/cpp/build && \
     cd /tmp/arrow/cpp/build && \
