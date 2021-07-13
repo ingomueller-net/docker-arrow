@@ -18,15 +18,19 @@ RUN apt-get update && \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Clang+LLVM
-RUN mkdir /opt/clang+llvm-9.0.0/ && \
-    cd /opt/clang+llvm-9.0.0/ && \
-    wget --progress=dot:giga http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz -O - \
+RUN mkdir /opt/clang+llvm-11.1.0/ && \
+    cd /opt/clang+llvm-11.1.0/ && \
+    wget --progress=dot:giga https://github.com/llvm/llvm-project/releases/download/llvmorg-11.1.0/clang+llvm-11.1.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz -O - \
          | tar -x -I xz --strip-components=1 && \
     for file in bin/*; \
     do \
-        ln -s $PWD/$file /usr/bin/$(basename $file)-9.0; \
+        ln -s $PWD/$file /usr/bin/$(basename $file)-11.1; \
     done && \
-    cp /opt/clang+llvm-9.0.0/lib/libomp.so /opt/clang+llvm-9.0.0/lib/libomp.so.5
+    ln -s libomp.so /opt/clang+llvm-11.1.0/lib/libomp.so.5 && \
+    update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-11.1 100 && \
+    update-alternatives --install /usr/bin/clang clang /usr/bin/clang-11.1 100
+
+ENV CMAKE_PREFIX_PATH $CMAKE_PREFIX_PATH:/opt/clang+llvm-11.1.0
 
 # Copy boost over from builder
 COPY --from=boost-builder /opt/ /opt/
@@ -45,10 +49,40 @@ RUN mkdir -p /tmp/arrow && \
     cd /tmp/arrow && \
     wget --progress=dot:giga https://github.com/apache/arrow/archive/apache-arrow-0.14.1.tar.gz -O - \
         | tar -xz --strip-components=1 && \
+    { \
+        echo 'diff --git a/cpp/CMakeLists.txt b/cpp/CMakeLists.txt'; \
+        echo 'index d4b90c7bc..7075310a6 100644'; \
+        echo '--- a/cpp/CMakeLists.txt'; \
+        echo '+++ b/cpp/CMakeLists.txt'; \
+        echo '@@ -648,8 +648,8 @@ if(ARROW_STATIC_LINK_LIBS)'; \
+        echo '   add_dependencies(arrow_dependencies ${ARROW_STATIC_LINK_LIBS})'; \
+        echo ' endif()'; \
+        echo ''; \
+        echo '-set(ARROW_SHARED_PRIVATE_LINK_LIBS ${ARROW_STATIC_LINK_LIBS} ${BOOST_SYSTEM_LIBRARY}'; \
+        echo '-                                   ${BOOST_FILESYSTEM_LIBRARY} ${BOOST_REGEX_LIBRARY})'; \
+        echo '+set(ARROW_SHARED_PRIVATE_LINK_LIBS ${ARROW_STATIC_LINK_LIBS} ${BOOST_FILESYSTEM_LIBRARY}'; \
+        echo '+                                   ${BOOST_SYSTEM_LIBRARY} ${BOOST_REGEX_LIBRARY})'; \
+        echo ''; \
+        echo ' list(APPEND ARROW_STATIC_LINK_LIBS ${BOOST_SYSTEM_LIBRARY} ${BOOST_FILESYSTEM_LIBRARY}'; \
+        echo '             ${BOOST_REGEX_LIBRARY})'; \
+        echo 'diff --git a/cpp/thirdparty/versions.txt b/cpp/thirdparty/versions.txt'; \
+        echo 'index d960cb0d0..397a4bd98 100644'; \
+        echo '--- a/cpp/thirdparty/versions.txt'; \
+        echo '+++ b/cpp/thirdparty/versions.txt'; \
+        echo '@@ -28,7 +28,7 @@ BROTLI_VERSION=v1.0.7'; \
+        echo ' BZIP2_VERSION=1.0.6'; \
+        echo ' CARES_VERSION=1.15.0'; \
+        echo ' DOUBLE_CONVERSION_VERSION=v3.1.4'; \
+        echo '-FLATBUFFERS_VERSION=v1.10.0'; \
+        echo '+FLATBUFFERS_VERSION=v1.12.0'; \
+        echo ' GBENCHMARK_VERSION=v1.4.1'; \
+        echo ' GFLAGS_VERSION=v2.2.0'; \
+        echo ' GLOG_VERSION=v0.3.5'; \
+    } | patch -p1 && \
     pip3 install -r /tmp/arrow/python/requirements-build.txt && \
     mkdir -p /tmp/arrow/cpp/build && \
     cd /tmp/arrow/cpp/build && \
-    CXX=clang++-9.0 CC=clang-9.0 \
+    CXX=clang++-11.1 CC=clang-11.1 \
         cmake \
             -DCMAKE_COLOR_MAKEFILE=OFF \
             -DCMAKE_BUILD_TYPE=Debug \
