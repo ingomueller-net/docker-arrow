@@ -1,6 +1,6 @@
 FROM ingomuellernet/boost:1.76.0 as boost-builder
 
-FROM ubuntu:focal
+FROM ubuntu:focal AS builder
 MAINTAINER Ingo Müller <ingo.mueller@inf.ethz.ch>
 
 # Basics
@@ -113,3 +113,9 @@ RUN mkdir -p /tmp/arrow && \
     cp /tmp/arrow/python/dist/*.whl /opt/arrow-*/share &&\
     cp -r /tmp/arrow/dist/* /opt/arrow-*/ && \
     cd / && rm -rf /tmp/arrow
+
+# Main image
+FROM ubuntu:focal
+
+COPY --from=builder /opt/arrow-0.14 /opt/arrow-0.14
+COPY --from=builder /opt/boost-1.76.0 /opt/boost-1.76.0
