@@ -1,4 +1,4 @@
-FROM ingomuellernet/boost:1.74.0 as boost-builder
+FROM ingomuellernet/boost:1.76.0 as boost-builder
 
 FROM ubuntu:focal
 MAINTAINER Ingo Müller <ingo.mueller@inf.ethz.ch>
@@ -35,14 +35,14 @@ ENV CMAKE_PREFIX_PATH $CMAKE_PREFIX_PATH:/opt/clang+llvm-11.1.0
 # Copy boost over from builder
 COPY --from=boost-builder /opt/ /opt/
 
-RUN for file in /opt/boost-1.74.0/include/*; do \
+RUN for file in /opt/boost-1.76.0/include/*; do \
         ln -s $file /usr/include/; \
     done && \
-    for file in /opt/boost-1.74.0/lib/*; do \
+    for file in /opt/boost-1.76.0/lib/*; do \
         ln -s $file /usr/lib/; \
     done
 
-ENV CMAKE_PREFIX_PATH $CMAKE_PREFIX_PATH:/opt/boost-1.74.0
+ENV CMAKE_PREFIX_PATH $CMAKE_PREFIX_PATH:/opt/boost-1.76.0
 
 # Build arrow and pyarrow
 RUN mkdir -p /tmp/arrow && \
